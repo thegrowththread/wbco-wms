@@ -68,7 +68,7 @@ export async function POST(request: Request) {
             title: item.title,
             quantity_required: remaining,
             quantity_picked: 0,
-            warehouse_code: inv.warehouse_code ?? null,
+            warehouse_code: inv.warehouse_code ?? null,
             location_hint: item.location_hint,
             is_complete: false,
           })
