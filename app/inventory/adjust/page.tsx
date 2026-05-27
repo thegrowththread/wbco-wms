@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import AppLayout from '@/components/layout/AppLayout'
@@ -16,7 +16,7 @@ const REASONS = [
   'Other',
 ]
 
-export default function AdjustInventoryPage() {
+function AdjustInventoryContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -37,8 +37,8 @@ export default function AdjustInventoryPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       const { data: p } = await supabase.from('users').select('name, role').eq('id', user.id).single()
-      if (p?.role !== 'admin') { router.push('/inventory'); return }
-      setProfile(p)
+      if ((p as any)?.role !== 'admin') { router.push('/inventory'); return }
+      setProfile(p as any)
       const { data: wh } = await supabase.from('warehouses').select('code, name').eq('is_active', true).order('code')
       setWarehouses(wh ?? [])
       if (wh && wh.length > 0) setWarehouseCode(wh[0].code)
@@ -72,7 +72,7 @@ export default function AdjustInventoryPage() {
   if (!profile) return null
 
   return (
-    <AppLayout role={profile.role} name={profile.name}>
+    <AppLayout role={(profile as any).role} name={profile.name}>
       <div className="max-w-lg space-y-5">
         <div>
           <a href="/inventory" className="text-xs text-gray-500 hover:text-gray-300 mb-1 block">← Inventory</a>
@@ -147,6 +147,14 @@ export default function AdjustInventoryPage() {
         )}
       </div>
     </AppLayout>
+  )
+}
+
+export default function AdjustInventoryPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdjustInventoryContent />
+    </Suspense>
   )
 }
 
